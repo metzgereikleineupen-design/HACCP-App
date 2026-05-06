@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HACCP Temperaturkontrolle</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:100vh;}
+.app{max-width:480px;margin:0 auto;padding:1rem;}
+h1{font-size:18px;font-weight:500;margin-bottom:4px;}
+.app-sub{font-size:12px;color:#888;margin-bottom:1rem;}
+.tabs{display:flex;gap:4px;margin-bottom:1rem;}
+.tab{flex:1;padding:10px 4px;font-size:13px;text-align:center;border:1px solid #ddd;border-radius:8px;cursor:pointer;color:#888;background:#fff;}
+.tab.active{background:#f0f0ec;color:#1a1a1a;font-weight:500;}
+.hero{border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;text-align:center;border:1px solid #97C459;background:#EAF3DE;}
+.hero-title{font-size:15px;font-weight:500;color:#3B6D11;margin-bottom:2px;}
+.hero-sub{font-size:12px;color:#3B6D11;opacity:.85;}
+.hero.alarm{background:#FCEBEB;border-color:#F09595;}
+.hero.alarm .hero-title,.hero.alarm .hero-sub{color:#A32D2D;}
+.hero.abw{background:#FAEEDA;border-color:#FAC775;}
+.hero.abw .hero-title,.hero.abw .hero-sub{color:#633806;}
+.section-label{font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;}
+.cell-card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:.85rem 1rem;margin-bottom:.6rem;}
+.cell-row{display:flex;align-items:center;gap:8px;}
+.cell-name{font-size:14px;font-weight:500;flex:1;}
+.cell-target{font-size:11px;color:#888;margin-top:2px;}
+.badge{font-size:12px;padding:3px 10px;border-radius:6px;font-weight:500;white-space:nowrap;}
+.ok-badge{background:#EAF3DE;color:#3B6D11;}
+.warn-badge{background:#FCEBEB;color:#A32D2D;}
+.toggle-link{font-size:12px;color:#888;text-decoration:underline;cursor:pointer;margin-left:4px;white-space:nowrap;}
+.abw-section{margin-top:.75rem;padding-top:.75rem;border-top:1px solid #f0f0ec;}
+.abw-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.abw-label{font-size:12px;color:#888;min-width:80px;}
+.temp-in{width:76px;font-size:16px;text-align:center;border:1px solid #ddd;border-radius:6px;padding:6px 4px;background:#fafafa;}
+.temp-in:focus{outline:none;border-color:#97C459;}
+select{flex:1;font-size:13px;border:1px solid #ddd;border-radius:6px;padding:7px 8px;background:#fafafa;}
+select:focus{outline:none;border-color:#97C459;}
+textarea{width:100%;font-size:13px;min-height:44px;resize:vertical;margin-top:4px;border:1px solid #ddd;border-radius:6px;padding:6px 8px;background:#fafafa;font-family:inherit;}
+textarea:focus{outline:none;border-color:#97C459;}
+input[type=text],input[type=time]{border:1px solid #ddd;border-radius:6px;padding:7px 10px;background:#fafafa;font-size:13px;font-family:inherit;}
+input[type=text]:focus,input[type=time]:focus{outline:none;border-color:#97C459;}
+.report-btn{width:100%;padding:14px;font-size:15px;font-weight:500;margin-top:.75rem;border-radius:10px;cursor:pointer;background:#FCEBEB;border:1px solid #F09595;color:#A32D2D;}
+.report-btn:active{transform:scale(.98);}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+.stat-card{background:#fff;border-radius:8px;padding:.75rem 1rem;border:1px solid #e8e8e4;}
+.stat-num{font-size:22px;font-weight:500;}
+.stat-lbl{font-size:12px;color:#888;margin-top:2px;}
+.log-card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:.5rem 1rem;max-height:50vh;overflow-y:auto;}
+.log-entry{font-size:13px;padding:9px 0;border-bottom:1px solid #f0f0ec;}
+.log-entry:last-child{border-bottom:none;}
+.log-date{font-weight:500;font-size:13px;}
+.log-detail{font-size:12px;margin-top:3px;color:#666;}
+.empty{font-size:14px;color:#aaa;text-align:center;padding:2rem 0;}
+.feedback{text-align:center;font-size:13px;margin-top:6px;min-height:18px;}
+.export-btn{width:100%;padding:12px;font-size:14px;margin-top:.5rem;border-radius:10px;cursor:pointer;background:#fff;border:1px solid #ddd;color:#1a1a1a;}
+.export-btn:active{transform:scale(.98);}
+.info-banner{background:#f4f4f0;border:1px solid #e8e8e4;border-radius:8px;padding:.6rem 1rem;margin-bottom:1rem;font-size:12px;color:#888;text-align:center;}
+.sig-row{display:flex;align-items:center;gap:8px;margin-top:.75rem;margin-bottom:.25rem;}
+.sig-label{font-size:13px;color:#888;min-width:80px;}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid #e8e8e4;}
+.logo{width:36px;height:36px;background:#EAF3DE;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="header">
+  <div>
+    <h1>HACCP Temperaturkontrolle</h1>
+    <div class="app-sub">Tägliche Kühlzellen-Dokumentation · AFSCA-konform</div>
+  </div>
+  <div class="logo">🌡️</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab-heute" onclick="showTab('heute')">Heute</div>
+  <div class="tab" id="tab-verlauf" onclick="showTab('verlauf')">Verlauf</div>
+</div>
+
+<div id="view-heute">
+  <div id="status-hero" class="hero">
+    <div class="hero-title" id="hero-title">Heute: Alles OK</div>
+    <div class="hero-sub" id="hero-sub"></div>
+  </div>
+
+  <div class="section-label">Abweichung melden</div>
+  <div id="cells-container"></div>
+
+  <div id="abw-active" style="display:none;">
+    <div class="sig-row">
+      <span class="sig-label">Unterschrift</span>
+      <input type="text" placeholder="Name / Kürzel" id="sig" style="flex:1;"/>
+    </div>
+    <input type="time" id="check-time" style="width:100%;margin-bottom:.25rem;margin-top:.25rem;"/>
+    <button class="report-btn" onclick="saveAbweichung()">Abweichung speichern</button>
+    <div class="feedback" id="feedback"></div>
+  </div>
+</div>
+
+<div id="view-verlauf" style="display:none;">
+  <div class="info-banner" id="info-banner"></div>
+  <div class="stat-grid" id="stat-grid"></div>
+  <div class="section-label">Abweichungen</div>
+  <div class="log-card" id="log-list"><div class="empty">Keine Abweichungen – sehr gut!</div></div>
+  <button class="export-btn" onclick="exportCSV()">📥 Als CSV exportieren (alle Tage)</button>
+</div>
+
+</div>
+
+<script>
+const CELLS=[
+  {id:'atelier',name:'Kühlraum Atelier',   soll:3,  min:1,  max:5,  frost:false},
+  {id:'laden',  name:'Kühlraum Laden',      soll:3,  min:1,  max:5,  frost:false},
+  {id:'froster',name:'Froster',             soll:-20,min:-23,max:-17,frost:true},
+  {id:'theke',  name:'Theke',               soll:3,  min:1,  max:5,  frost:false},
+  {id:'gfl',    name:'Gefrierschrank Laden',soll:-20,min:-23,max:-17,frost:true},
+  {id:'ksl',    name:'Kühlschrank Laden',   soll:3,  min:1,  max:5,  frost:false},
+];
+
+let log=[];
+try{const s=localStorage.getItem('kh_haccp_log');if(s)log=JSON.parse(s);}catch(e){}
+function saveLog(){try{localStorage.setItem('kh_haccp_log',JSON.stringify(log));}catch(e){}}
+
+function todayKey(){return new Date().toISOString().slice(0,10);}
+function nowTime(){const d=new Date();return d.toTimeString().slice(0,5);}
+function todayDisplay(){return new Date().toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});}
+
+function fillHistoricOk(){
+  const existingKeys=new Set(log.map(e=>e.key));
+  const start=new Date('2026-01-01');
+  const today=new Date();today.setHours(0,0,0,0);
+  for(let d=new Date(start);d<=today;d.setDate(d.getDate()+1)){
+    const key=d.toISOString().slice(0,10);
+    if(!existingKeys.has(key)){
+      const display=new Date(key+'T12:00:00').toLocaleDateString('de-DE');
+      log.push({key,datum:display,uhrzeit:'auto',signatur:'auto',autoOk:true,zellen:[],hasAlarm:false});
+    }
+  }
+  log.sort((a,b)=>b.key.localeCompare(a.key));
+  saveLog();
+}
+
+let abwOpen={};
+
+function buildCells(){
+  const c=document.getElementById('cells-container');
+  c.innerHTML='';
+  CELLS.forEach(cell=>{
+    c.innerHTML+=`
+    <div class="cell-card" id="card-${cell.id}">
+      <div class="cell-row">
+        <div style="flex:1;">
+          <div class="cell-name">${cell.name}</div>
+          <div class="cell-target">Sollwert: ${cell.soll>0?'+':''}${cell.soll}°C</div>
+        </div>
+        <span class="badge ok-badge" id="badge-${cell.id}">OK</span>
+        <span class="toggle-link" id="toggle-${cell.id}" onclick="toggleAbw('${cell.id}')">Problem?</span>
+      </div>
+      <div class="abw-section" id="abw-${cell.id}" style="display:none;">
+        <div class="abw-row">
+          <span class="abw-label">Ist-Temp.</span>
+          <input class="temp-in" type="number" step="0.1" placeholder="${cell.soll}°C" id="temp-${cell.id}"
+            oninput="checkTemp('${cell.id}',${cell.min},${cell.max})"/>
+          <span style="font-size:13px;color:#888;">°C</span>
+        </div>
+        <div class="abw-row">
+          <span class="abw-label">Maßnahme</span>
+          <select id="action-${cell.id}">
+            <option value="">– bitte wählen –</option>
+            <option value="beobachtet">Beobachtet, kein Handlungsbedarf</option>
+            <option value="techniker">Techniker kontaktiert</option>
+            <option value="umgelagert">Ware umgelagert</option>
+            <option value="ware_geprueft">Ware geprüft, in Ordnung</option>
+            <option value="ware_entsorgt">Ware entsorgt</option>
+            <option value="sonstiges">Sonstiges (siehe Notiz)</option>
+          </select>
+        </div>
+        <textarea id="note-${cell.id}" placeholder="Weitere Notizen..."></textarea>
+      </div>
+    </div>`;
+  });
+  updateHero();
+}
+
+function toggleAbw(id){
+  abwOpen[id]=!abwOpen[id];
+  document.getElementById('abw-'+id).style.display=abwOpen[id]?'':'none';
+  document.getElementById('toggle-'+id).textContent=abwOpen[id]?'Abbrechen':'Problem?';
+  if(!abwOpen[id]){
+    document.getElementById('temp-'+id).value='';
+    document.getElementById('badge-'+id).className='badge ok-badge';
+    document.getElementById('badge-'+id).textContent='OK';
+  }
+  const anyOpen=Object.values(abwOpen).some(v=>v);
+  document.getElementById('abw-active').style.display=anyOpen?'':'none';
+  if(anyOpen)document.getElementById('check-time').value=nowTime();
+  updateHero();
+}
+
+function checkTemp(id,min,max){
+  const v=parseFloat(document.getElementById('temp-'+id).value);
+  const badge=document.getElementById('badge-'+id);
+  if(isNaN(v)){badge.className='badge ok-badge';badge.textContent='OK';return;}
+  badge.className=v>=min&&v<=max?'badge ok-badge':'badge warn-badge';
+  badge.textContent=v>=min&&v<=max?'OK':'ALARM';
+  updateHero();
+}
+
+function updateHero(){
+  const anyOpen=Object.values(abwOpen).some(v=>v);
+  const hasAlarm=CELLS.some(cell=>{
+    if(!abwOpen[cell.id])return false;
+    const v=parseFloat(document.getElementById('temp-'+cell.id).value);
+    return !isNaN(v)&&(v<cell.min||v>cell.max);
+  });
+  const hero=document.getElementById('status-hero');
+  const title=document.getElementById('hero-title');
+  const sub=document.getElementById('hero-sub');
+  if(hasAlarm){
+    hero.className='hero alarm';
+    title.textContent='Alarm – Abweichung festgestellt';
+    sub.textContent=todayDisplay();
+  } else if(anyOpen){
+    hero.className='hero abw';
+    title.textContent='Abweichung wird erfasst...';
+    sub.textContent=todayDisplay();
+  } else {
+    hero.className='hero';
+    title.textContent='Heute: Alles OK';
+    sub.textContent=todayDisplay()+' · Automatisch bestätigt';
+  }
+}
+
+function saveAbweichung(){
+  const key=todayKey();
+  const entry={
+    key,datum:new Date().toLocaleDateString('de-DE'),
+    uhrzeit:document.getElementById('check-time').value||nowTime(),
+    signatur:document.getElementById('sig').value.trim()||'–',
+    autoOk:false,zellen:[],hasAlarm:false
+  };
+  CELLS.forEach(cell=>{
+    if(abwOpen[cell.id]){
+      const v=parseFloat(document.getElementById('temp-'+cell.id).value);
+      const action=document.getElementById('action-'+cell.id).value;
+      const note=document.getElementById('note-'+cell.id).value.trim();
+      const alarm=!isNaN(v)&&(v<cell.min||v>cell.max);
+      if(alarm)entry.hasAlarm=true;
+      entry.zellen.push({name:cell.name,soll:cell.soll,ist:isNaN(v)?null:v,action,note,alarm});
+    }
+  });
+  const idx=log.findIndex(e=>e.key===key);
+  if(idx>=0)log[idx]=entry;else log.unshift(entry);
+  saveLog();
+  const fb=document.getElementById('feedback');
+  fb.textContent=entry.hasAlarm?'Alarm gespeichert!':'Abweichung gespeichert.';
+  fb.style.color=entry.hasAlarm?'#A32D2D':'#633806';
+  CELLS.forEach(cell=>{
+    abwOpen[cell.id]=false;
+    document.getElementById('abw-'+cell.id).style.display='none';
+    document.getElementById('toggle-'+cell.id).textContent='Problem?';
+    document.getElementById('badge-'+cell.id).className='badge ok-badge';
+    document.getElementById('badge-'+cell.id).textContent='OK';
+    document.getElementById('temp-'+cell.id).value='';
+  });
+  document.getElementById('abw-active').style.display='none';
+  setTimeout(()=>{fb.textContent='';},3000);
+  updateHero();
+  renderLog();
+}
+
+function showTab(tab){
+  document.getElementById('view-heute').style.display=tab==='heute'?'':'none';
+  document.getElementById('view-verlauf').style.display=tab==='verlauf'?'':'none';
+  document.getElementById('tab-heute').className='tab'+(tab==='heute'?' active':'');
+  document.getElementById('tab-verlauf').className='tab'+(tab==='verlauf'?' active':'');
+  if(tab==='verlauf')renderLog();
+}
+
+function renderLog(){
+  const total=log.length;
+  const alarme=log.filter(e=>e.hasAlarm).length;
+  const abweich=log.filter(e=>!e.autoOk).length;
+  document.getElementById('info-banner').textContent=
+    `Dokumentation ab 01.01.2026 · ${total} Tage erfasst · ${abweich} Abweichung(en)`;
+  document.getElementById('stat-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">Tage erfasst</div></div>
+    <div class="stat-card"><div class="stat-num">${abweich}</div><div class="stat-lbl">Abweichungen</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:${alarme>0?'#A32D2D':'#1a1a1a'}">${alarme}</div><div class="stat-lbl">Alarm-Tage</div></div>
+    <div class="stat-card"><div class="stat-num">${total>0?Math.round((total-alarme)/total*100):100}%</div><div class="stat-lbl">Tage ohne Alarm</div></div>`;
+  const abwLog=log.filter(e=>!e.autoOk);
+  const list=document.getElementById('log-list');
+  if(!abwLog.length){list.innerHTML='<div class="empty">Keine Abweichungen seit 01.01.2026 – sehr gut!</div>';return;}
+  list.innerHTML=abwLog.map(e=>`
+    <div class="log-entry">
+      <div style="display:flex;justify-content:space-between;">
+        <span class="log-date">${e.datum}</span>
+        <span style="font-size:12px;color:#888;">${e.uhrzeit} · ${e.signatur}</span>
+      </div>
+      <div class="log-detail">
+        ${e.zellen.map(z=>`${z.name}: ${z.ist!==null?z.ist.toFixed(1)+'°C':'–'}${z.alarm?' ⚠':''} (${z.action||'–'})`).join('<br>')}
+      </div>
+    </div>`).join('');
+}
+
+function exportCSV(){
+  let csv='Datum;Typ;Uhrzeit;Signatur;Kühlzelle;Sollwert;Ist-Temp;Alarm;Maßnahme;Notiz\n';
+  log.forEach(e=>{
+    if(e.autoOk||!e.zellen.length){
+      CELLS.forEach(cell=>{
+        csv+=`${e.datum};Auto-OK;${e.uhrzeit};${e.signatur};${cell.name};${cell.soll}°C;OK;Nein;–;\n`;
+      });
+    } else {
+      e.zellen.forEach(z=>{
+        csv+=`${e.datum};Abweichung;${e.uhrzeit};${e.signatur};${z.name};${z.soll}°C;${z.ist!==null?z.ist.toFixed(1):'–'};${z.alarm?'JA':'Nein'};${z.action||'–'};${z.note||''}\n`;
+      });
+    }
+  });
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download='haccp_temperatur_ab_01012026.csv';a.click();
+}
+
+fillHistoricOk();
+buildCells();
+renderLog();
+</script>
+</body>
+</html>
