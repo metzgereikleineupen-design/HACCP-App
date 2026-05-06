@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reinigungscheck – Metzgerei</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f4f0;color:#1a1a1a;min-height:100vh;}
+.app{max-width:480px;margin:0 auto;padding:1rem;}
+.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;padding-bottom:1rem;border-bottom:1px solid #e8e8e4;}
+h1{font-size:18px;font-weight:500;}
+.app-sub{font-size:12px;color:#888;margin-top:2px;}
+.logo{width:36px;height:36px;background:#EAF3DE;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.tabs{display:flex;gap:4px;margin-bottom:1rem;}
+.tab{flex:1;padding:9px 4px;font-size:13px;text-align:center;border:1px solid #ddd;border-radius:8px;cursor:pointer;color:#888;background:#fff;}
+.tab.active{background:#f0f0ec;color:#1a1a1a;font-weight:500;}
+.hero{border-radius:12px;padding:1rem 1.25rem;margin-bottom:1rem;text-align:center;border:1px solid #97C459;background:#EAF3DE;}
+.hero-title{font-size:15px;font-weight:500;color:#3B6D11;margin-bottom:2px;}
+.hero-sub{font-size:12px;color:#3B6D11;opacity:.85;}
+.hero.alarm{background:#FCEBEB;border-color:#F09595;}
+.hero.alarm .hero-title,.hero.alarm .hero-sub{color:#A32D2D;}
+.hero.abw{background:#FAEEDA;border-color:#FAC775;}
+.hero.abw .hero-title,.hero.abw .hero-sub{color:#633806;}
+.section-label{font-size:11px;font-weight:500;color:#aaa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;margin-top:1rem;}
+.task-card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:.85rem 1rem;margin-bottom:.6rem;}
+.task-row{display:flex;align-items:center;gap:8px;}
+.task-name{font-size:14px;font-weight:500;flex:1;}
+.task-freq{font-size:11px;color:#888;margin-top:2px;}
+.badge{font-size:11px;padding:3px 9px;border-radius:5px;font-weight:500;white-space:nowrap;}
+.ok-badge{background:#EAF3DE;color:#3B6D11;}
+.warn-badge{background:#FCEBEB;color:#A32D2D;}
+.due-badge{background:#FAEEDA;color:#633806;}
+.toggle-link{font-size:12px;color:#888;text-decoration:underline;cursor:pointer;white-space:nowrap;}
+.abw-section{margin-top:.75rem;padding-top:.75rem;border-top:1px solid #f0f0ec;}
+.abw-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.abw-label{font-size:12px;color:#888;min-width:80px;}
+select{flex:1;font-size:13px;border:1px solid #ddd;border-radius:6px;padding:7px 8px;background:#fafafa;}
+textarea{width:100%;font-size:13px;min-height:44px;resize:vertical;border:1px solid #ddd;border-radius:6px;padding:6px 8px;background:#fafafa;font-family:inherit;margin-top:4px;}
+input[type=text],input[type=time]{border:1px solid #ddd;border-radius:6px;padding:7px 10px;background:#fafafa;font-size:13px;font-family:inherit;}
+.confirm-btn{width:100%;padding:13px;font-size:15px;font-weight:500;margin-top:.75rem;border-radius:10px;cursor:pointer;border:1px solid #97C459;background:#EAF3DE;color:#3B6D11;}
+.confirm-btn:active{transform:scale(.98);}
+.report-btn{width:100%;padding:13px;font-size:15px;font-weight:500;margin-top:.75rem;border-radius:10px;cursor:pointer;background:#FCEBEB;border:1px solid #F09595;color:#A32D2D;}
+.sig-row{display:flex;align-items:center;gap:8px;margin-top:.75rem;}
+.sig-label{font-size:13px;color:#888;min-width:80px;}
+.feedback{text-align:center;font-size:13px;margin-top:6px;min-height:18px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;}
+.stat-card{background:#fff;border-radius:8px;padding:.75rem 1rem;border:1px solid #e8e8e4;}
+.stat-num{font-size:22px;font-weight:500;}
+.stat-lbl{font-size:12px;color:#888;margin-top:2px;}
+.log-card{background:#fff;border:1px solid #e8e8e4;border-radius:12px;padding:.5rem 1rem;max-height:50vh;overflow-y:auto;}
+.log-entry{font-size:13px;padding:9px 0;border-bottom:1px solid #f0f0ec;}
+.log-entry:last-child{border-bottom:none;}
+.log-date{font-weight:500;}
+.log-detail{font-size:12px;color:#666;margin-top:3px;}
+.empty{font-size:14px;color:#aaa;text-align:center;padding:2rem 0;}
+.export-btn{width:100%;padding:12px;font-size:14px;margin-top:.5rem;border-radius:10px;cursor:pointer;background:#fff;border:1px solid #ddd;color:#1a1a1a;}
+.info-banner{background:#f4f4f0;border:1px solid #e8e8e4;border-radius:8px;padding:.6rem 1rem;margin-bottom:1rem;font-size:12px;color:#888;text-align:center;}
+.reminder{background:#FAEEDA;border:1px solid #FAC775;border-radius:12px;padding:.85rem 1rem;margin-bottom:1rem;font-size:13px;color:#633806;}
+.reminder-title{font-weight:500;margin-bottom:4px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="header">
+  <div>
+    <h1>Reinigungscheck</h1>
+    <div class="app-sub">Metzgerei · AFSCA G-003</div>
+  </div>
+  <div class="logo">🧹</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tab-heute" onclick="showTab('heute')">Heute</div>
+  <div class="tab" id="tab-woechentlich" onclick="showTab('woechentlich')">Wöchentlich</div>
+  <div class="tab" id="tab-verlauf" onclick="showTab('verlauf')">Verlauf</div>
+</div>
+
+<!-- HEUTE -->
+<div id="view-heute">
+  <div id="hero" class="hero">
+    <div class="hero-title" id="hero-title">Heute: Alles gereinigt</div>
+    <div class="hero-sub" id="hero-sub"></div>
+  </div>
+
+  <div id="reminder-box" style="display:none;" class="reminder">
+    <div class="reminder-title">⏰ Erinnerung</div>
+    <div id="reminder-text"></div>
+  </div>
+
+  <div class="section-label">Problem melden</div>
+  <div id="daily-tasks"></div>
+
+  <div id="abw-active" style="display:none;">
+    <div class="sig-row">
+      <span class="sig-label">Unterschrift</span>
+      <input type="text" placeholder="Name / Kürzel" id="sig" style="flex:1;"/>
+    </div>
+    <input type="time" id="check-time" style="width:100%;margin-top:.5rem;"/>
+    <button class="report-btn" onclick="saveProblem()">Problem speichern</button>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <button class="confirm-btn" id="confirm-btn" onclick="confirmOk()">Alles gereinigt – Bestätigen</button>
+</div>
+
+<!-- WÖCHENTLICH / MONATLICH -->
+<div id="view-woechentlich" style="display:none;">
+  <div class="section-label">Wöchentliche Aufgaben</div>
+  <div id="weekly-tasks"></div>
+  <div class="section-label">Monatliche Aufgaben</div>
+  <div id="monthly-tasks"></div>
+  <button class="confirm-btn" onclick="savePeriodicTasks()" style="margin-top:.5rem;">Erledigte Aufgaben speichern</button>
+  <div class="feedback" id="feedback-periodic"></div>
+</div>
+
+<!-- VERLAUF -->
+<div id="view-verlauf" style="display:none;">
+  <div class="info-banner" id="info-banner"></div>
+  <div class="stat-grid" id="stat-grid"></div>
+  <div class="section-label">Probleme & Abweichungen</div>
+  <div class="log-card" id="log-list"><div class="empty">Keine Probleme – sehr gut!</div></div>
+  <button class="export-btn" onclick="exportCSV()">Als CSV exportieren</button>
+</div>
+
+</div>
+<script>
+const DAILY = [
+  'Arbeitsflächen Atelier',
+  'Messer & Werkzeuge',
+  'Fleischwolf',
+  'Aufschnittmaschine',
+  'Schneidebretter',
+  'Hackstock',
+  'Theke (Vitrine)',
+  'Tresen / Verkaufstheke',
+  'Boden Atelier',
+  'Boden Laden',
+  'Spülbecken',
+  'Türgriffe & Lichtschalter',
+  'Toilette & Handwaschbecken',
+];
+
+const WEEKLY = [
+  'Kühlraum Atelier – komplett',
+  'Kühlraum Laden – komplett',
+  'Kühlschrank Laden',
+  'Wände Atelier',
+  'Regale Laden',
+  'Türdichtungen alle Kühlzellen',
+  'Umkleide / Sanitäranlagen',
+];
+
+const MONTHLY = [
+  'Froster – Abtauen & Reinigung',
+  'Gefrierschrank Laden – Abtauen',
+  'Abluftgitter / Belüftung',
+  'Decken / Lampen',
+  'Schädlingskontrolle (visuell)',
+];
+
+let log = [];
+try { const s = localStorage.getItem('reinigung_log'); if(s) log = JSON.parse(s); } catch(e){}
+function saveLog(){ try{ localStorage.setItem('reinigung_log', JSON.stringify(log)); }catch(e){} }
+
+let periodicLog = [];
+try { const s = localStorage.getItem('reinigung_periodic'); if(s) periodicLog = JSON.parse(s); } catch(e){}
+function savePeriodicLog(){ try{ localStorage.setItem('reinigung_periodic', JSON.stringify(periodicLog)); }catch(e){} }
+
+function todayKey(){ return new Date().toISOString().slice(0,10); }
+function thisWeekKey(){
+  const d = new Date();
+  const day = d.getDay()||7;
+  const mon = new Date(d); mon.setDate(d.getDate()-day+1);
+  return mon.toISOString().slice(0,10);
+}
+function thisMonthKey(){ return new Date().toISOString().slice(0,7); }
+function nowTime(){ const d=new Date(); return d.toTimeString().slice(0,5); }
+function todayDisplay(){ return new Date().toLocaleDateString('de-DE',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'}); }
+function formatDate(iso){ return new Date(iso+'T12:00:00').toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+
+// AUTO-OK ab 01.01.2026
+function fillHistoricOk(){
+  const existing = new Set(log.map(e=>e.key));
+  const start = new Date('2026-01-01');
+  const today = new Date(); today.setHours(0,0,0,0);
+  for(let d=new Date(start); d<=today; d.setDate(d.getDate()+1)){
+    const key = d.toISOString().slice(0,10);
+    if(!existing.has(key)){
+      const display = new Date(key+'T12:00:00').toLocaleDateString('de-DE');
+      log.push({key, datum:display, uhrzeit:'auto', signatur:'auto', autoOk:true, probleme:[], hasAlarm:false});
+    }
+  }
+  log.sort((a,b)=>b.key.localeCompare(a.key));
+  saveLog();
+}
+
+let problemOpen = {};
+
+function buildDailyTasks(){
+  const c = document.getElementById('daily-tasks');
+  c.innerHTML = '';
+  DAILY.forEach(task => {
+    const id = task.replace(/[^a-z]/gi,'_');
+    c.innerHTML += `
+    <div class="task-card" id="card-${id}">
+      <div class="task-row">
+        <div style="flex:1;">
+          <div class="task-name">${task}</div>
+          <div class="task-freq">Täglich</div>
+        </div>
+        <span class="badge ok-badge" id="badge-${id}">OK</span>
+        <span class="toggle-link" id="toggle-${id}" onclick="toggleProblem('${id}','${task}')">Problem?</span>
+      </div>
+      <div class="abw-section" id="abw-${id}" style="display:none;">
+        <div class="abw-row">
+          <span class="abw-label">Problem</span>
+          <select id="issue-${id}">
+            <option value="">– bitte wählen –</option>
+            <option value="nicht_gereinigt">Nicht gereinigt (fehlte Zeit)</option>
+            <option value="unzureichend">Unzureichend gereinigt</option>
+            <option value="produkt_leer">Reinigungsmittel leer</option>
+            <option value="geraet_defekt">Gerät defekt</option>
+            <option value="sonstiges">Sonstiges (siehe Notiz)</option>
+          </select>
+        </div>
+        <textarea id="note-${id}" placeholder="Weitere Notizen / Korrekturmaßnahme..."></textarea>
+      </div>
+    </div>`;
+  });
+  updateHero();
+}
+
+function buildPeriodicTasks(){
+  const wc = document.getElementById('weekly-tasks');
+  const mc = document.getElementById('monthly-tasks');
+  wc.innerHTML = ''; mc.innerHTML = '';
+  const wKey = thisWeekKey();
+  const mKey = thisMonthKey();
+
+  WEEKLY.forEach(task => {
+    const id = 'w_'+task.replace(/[^a-z]/gi,'_');
+    const done = periodicLog.find(e=>e.key===wKey && e.task===task);
+    wc.innerHTML += `
+    <div class="task-card">
+      <div class="task-row">
+        <div style="flex:1;"><div class="task-name">${task}</div><div class="task-freq">Diese Woche</div></div>
+        <span class="badge ${done?'ok-badge':'due-badge'}" id="pbadge-${id}">${done?'Erledigt':'Fällig'}</span>
+        <input type="checkbox" id="pcheck-${id}" ${done?'checked':''} style="width:18px;height:18px;margin-left:8px;cursor:pointer;" onchange="updatePeriodicBadge('${id}')"/>
+      </div>
+    </div>`;
+  });
+
+  MONTHLY.forEach(task => {
+    const id = 'm_'+task.replace(/[^a-z]/gi,'_');
+    const done = periodicLog.find(e=>e.key===mKey && e.task===task);
+    mc.innerHTML += `
+    <div class="task-card">
+      <div class="task-row">
+        <div style="flex:1;"><div class="task-name">${task}</div><div class="task-freq">Diesen Monat</div></div>
+        <span class="badge ${done?'ok-badge':'due-badge'}" id="pbadge-${id}">${done?'Erledigt':'Fällig'}</span>
+        <input type="checkbox" id="pcheck-${id}" ${done?'checked':''} style="width:18px;height:18px;margin-left:8px;cursor:pointer;" onchange="updatePeriodicBadge('${id}')"/>
+      </div>
+    </div>`;
+  });
+}
+
+function updatePeriodicBadge(id){
+  const cb = document.getElementById('pcheck-'+id);
+  const badge = document.getElementById('pbadge-'+id);
+  badge.className = 'badge ' + (cb.checked ? 'ok-badge' : 'due-badge');
+  badge.textContent = cb.checked ? 'Erledigt' : 'Fällig';
+}
+
+function savePeriodicTasks(){
+  const wKey = thisWeekKey();
+  const mKey = thisMonthKey();
+  const now = new Date().toLocaleDateString('de-DE');
+
+  WEEKLY.forEach(task => {
+    const id = 'w_'+task.replace(/[^a-z]/gi,'_');
+    const cb = document.getElementById('pcheck-'+id);
+    if(cb && cb.checked){
+      const exists = periodicLog.find(e=>e.key===wKey&&e.task===task);
+      if(!exists) periodicLog.push({key:wKey, task, typ:'wöchentlich', datum:now});
+    }
+  });
+
+  MONTHLY.forEach(task => {
+    const id = 'm_'+task.replace(/[^a-z]/gi,'_');
+    const cb = document.getElementById('pcheck-'+id);
+    if(cb && cb.checked){
+      const exists = periodicLog.find(e=>e.key===mKey&&e.task===task);
+      if(!exists) periodicLog.push({key:mKey, task, typ:'monatlich', datum:now});
+    }
+  });
+
+  savePeriodicLog();
+  const fb = document.getElementById('feedback-periodic');
+  fb.textContent = 'Gespeichert!';
+  fb.style.color = '#3B6D11';
+  setTimeout(()=>{fb.textContent='';},2000);
+  buildPeriodicTasks();
+  checkReminder();
+}
+
+function toggleProblem(id, task){
+  problemOpen[id] = !problemOpen[id];
+  document.getElementById('abw-'+id).style.display = problemOpen[id] ? '' : 'none';
+  document.getElementById('toggle-'+id).textContent = problemOpen[id] ? 'Abbrechen' : 'Problem?';
+  if(!problemOpen[id]){
+    document.getElementById('badge-'+id).className = 'badge ok-badge';
+    document.getElementById('badge-'+id).textContent = 'OK';
+  } else {
+    document.getElementById('badge-'+id).className = 'badge warn-badge';
+    document.getElementById('badge-'+id).textContent = 'Problem';
+  }
+  const anyOpen = Object.values(problemOpen).some(v=>v);
+  document.getElementById('abw-active').style.display = anyOpen ? '' : 'none';
+  if(anyOpen) document.getElementById('check-time').value = nowTime();
+  updateHero();
+}
+
+function updateHero(){
+  const anyOpen = Object.values(problemOpen).some(v=>v);
+  const hero = document.getElementById('hero');
+  const title = document.getElementById('hero-title');
+  const sub = document.getElementById('hero-sub');
+  if(anyOpen){
+    hero.className = 'hero alarm';
+    title.textContent = 'Problem wird erfasst...';
+    sub.textContent = todayDisplay();
+  } else {
+    const todayEntry = log.find(e=>e.key===todayKey());
+    if(todayEntry && !todayEntry.autoOk && todayEntry.hasAlarm){
+      hero.className = 'hero alarm';
+      title.textContent = 'Problem heute eingetragen';
+      sub.textContent = todayDisplay();
+    } else {
+      hero.className = 'hero';
+      title.textContent = 'Heute: Alles gereinigt';
+      sub.textContent = todayDisplay() + ' · Automatisch bestätigt';
+    }
+  }
+}
+
+function confirmOk(){
+  const key = todayKey();
+  const exists = log.find(e=>e.key===key);
+  if(!exists){
+    log.unshift({key, datum:new Date().toLocaleDateString('de-DE'), uhrzeit:nowTime(), signatur:document.getElementById('sig').value||'–', autoOk:false, probleme:[], hasAlarm:false});
+    saveLog();
+  }
+  const fb = document.getElementById('feedback');
+  fb.textContent = 'Bestätigt!';
+  fb.style.color = '#3B6D11';
+  setTimeout(()=>{fb.textContent='';},2000);
+  updateHero();
+  renderLog();
+}
+
+function saveProblem(){
+  const key = todayKey();
+  const entry = {
+    key, datum:new Date().toLocaleDateString('de-DE'),
+    uhrzeit:document.getElementById('check-time').value||nowTime(),
+    signatur:document.getElementById('sig').value.trim()||'–',
+    autoOk:false, probleme:[], hasAlarm:true
+  };
+  DAILY.forEach(task => {
+    const id = task.replace(/[^a-z]/gi,'_');
+    if(problemOpen[id]){
+      const issue = document.getElementById('issue-'+id).value;
+      const note = document.getElementById('note-'+id).value.trim();
+      entry.probleme.push({task, issue, note});
+    }
+  });
+  const idx = log.findIndex(e=>e.key===key);
+  if(idx>=0) log[idx]=entry; else log.unshift(entry);
+  saveLog();
+  DAILY.forEach(task=>{
+    const id=task.replace(/[^a-z]/gi,'_');
+    problemOpen[id]=false;
+    const abw=document.getElementById('abw-'+id);
+    if(abw) abw.style.display='none';
+    const tog=document.getElementById('toggle-'+id);
+    if(tog) tog.textContent='Problem?';
+    const badge=document.getElementById('badge-'+id);
+    if(badge){badge.className='badge ok-badge';badge.textContent='OK';}
+  });
+  document.getElementById('abw-active').style.display='none';
+  const fb=document.getElementById('feedback');
+  fb.textContent='Problem gespeichert!';
+  fb.style.color='#A32D2D';
+  setTimeout(()=>{fb.textContent='';},3000);
+  updateHero();
+  renderLog();
+}
+
+function checkReminder(){
+  const box = document.getElementById('reminder-box');
+  const wKey = thisWeekKey();
+  const mKey = thisMonthKey();
+  const missingWeekly = WEEKLY.filter(t=>!periodicLog.find(e=>e.key===wKey&&e.task===t));
+  const missingMonthly = MONTHLY.filter(t=>!periodicLog.find(e=>e.key===mKey&&e.task===t));
+  const msgs = [];
+  if(missingWeekly.length > 0) msgs.push(`${missingWeekly.length} wöchentliche Aufgabe(n) diese Woche noch offen.`);
+  if(missingMonthly.length > 0) msgs.push(`${missingMonthly.length} monatliche Aufgabe(n) diesen Monat noch offen.`);
+  if(msgs.length > 0){
+    box.style.display = '';
+    document.getElementById('reminder-text').textContent = msgs.join(' ');
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function showTab(tab){
+  ['heute','woechentlich','verlauf'].forEach(t=>{
+    document.getElementById('view-'+t).style.display = t===tab?'':'none';
+    document.getElementById('tab-'+t).className = 'tab'+(t===tab?' active':'');
+  });
+  if(tab==='verlauf') renderLog();
+  if(tab==='woechentlich') buildPeriodicTasks();
+}
+
+function renderLog(){
+  const total = log.length;
+  const probleme = log.filter(e=>e.hasAlarm).length;
+  document.getElementById('stat-grid').innerHTML=`
+    <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-lbl">Tage erfasst</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:${probleme>0?'#A32D2D':'#1a1a1a'}">${probleme}</div><div class="stat-lbl">Probleme</div></div>`;
+  document.getElementById('info-banner').textContent = `Dokumentation ab 01.01.2026 · ${total} Tage · ${probleme} Problem(e)`;
+  const probLog = log.filter(e=>!e.autoOk&&e.hasAlarm);
+  const list = document.getElementById('log-list');
+  if(!probLog.length){list.innerHTML='<div class="empty">Keine Probleme seit 01.01.2026 – sehr gut!</div>';return;}
+  list.innerHTML = probLog.map(e=>`
+    <div class="log-entry">
+      <div style="display:flex;justify-content:space-between;">
+        <span class="log-date">${e.datum}</span>
+        <span style="font-size:12px;color:#888;">${e.uhrzeit} · ${e.signatur}</span>
+      </div>
+      <div class="log-detail">
+        ${e.probleme.map(p=>`${p.task}: ${p.issue||'–'}${p.note?' – '+p.note:''}`).join('<br>')}
+      </div>
+    </div>`).join('');
+}
+
+function exportCSV(){
+  let csv = 'Datum;Typ;Uhrzeit;Signatur;Aufgabe;Problem;Notiz\n';
+  log.forEach(e=>{
+    if(e.autoOk||!e.probleme.length){
+      csv += `${e.datum};Auto-OK;${e.uhrzeit};${e.signatur};Alle tägl. Aufgaben;OK;\n`;
+    } else {
+      e.probleme.forEach(p=>{
+        csv += `${e.datum};Problem;${e.uhrzeit};${e.signatur};${p.task};${p.issue||'–'};${p.note||''}\n`;
+      });
+    }
+  });
+  periodicLog.forEach(e=>{
+    csv += `${e.datum};${e.typ};–;–;${e.task};Erledigt;\n`;
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download = 'reinigungscheck_log.csv';
+  a.click();
+}
+
+fillHistoricOk();
+buildDailyTasks();
+checkReminder();
+renderLog();
+document.getElementById('hero-sub').textContent = todayDisplay() + ' · Automatisch bestätigt';
+</script>
+</body>
+</html>
